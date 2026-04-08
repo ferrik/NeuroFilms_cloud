@@ -159,7 +159,9 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
 # Entry point
 # ------------------------------------------------------------------
 
-def run(host: str = "0.0.0.0", port: int = 8080) -> None:
+def run(host: str = "0.0.0.0", port: int | None = None) -> None:
+    import os
+    port = port or int(os.environ.get("PORT", 8080))
     httpd = ThreadingHTTPServer((host, port), NeuroFilmsHandler)
     print(f"NeuroFilms running on http://{host}:{port}")
     httpd.serve_forever()
