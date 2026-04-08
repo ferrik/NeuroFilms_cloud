@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -699,13 +699,13 @@
 <nav>
   <a class="logo" href="#">Neuro<span>Films</span></a>
   <ul class="nav-links">
-    <li><a href="#catalog" class="active">Каталог</a></li>
+    <li><a href="#catalog" class="active">Catalog</a></li>
     <li><a href="#featured">Featured</a></li>
     <li><a href="#new_drops">New Drops</a></li>
     <li><a href="#music_visions">Music</a></li>
   </ul>
   <div class="nav-right">
-    <button class="btn-premium">Premium · $4/міс</button>
+    <button class="btn-premium">Premium · $4/mo</button>
   </div>
 </nav>
 
@@ -716,29 +716,29 @@
 
   <div class="hero-content">
     <div class="hero-badge">AI Film Festival — 24/7</div>
-    <h1>Кіно <em>нового</em> покоління</h1>
-    <p class="hero-sub">Перша кураторська платформа короткометражних фільмів, серіалів та кліпів, створених людьми за допомогою ШІ.</p>
+    <h1>Cinema of a <em>New</em> Era</h1>
+    <p class="hero-sub">The first curated platform for short films, mini-series and music videos made by humans using AI.</p>
     <div class="hero-actions">
       <a href="#catalog" class="btn-watch">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2.5l11 5.5-11 5.5V2.5z"/></svg>
-        Дивитись
+        Watch Now
       </a>
-      <a href="#submit" class="btn-browse">Подати роботу</a>
+      <a href="#submit" class="btn-browse">Submit Your Work</a>
     </div>
   </div>
 
   <div class="hero-stats" id="heroStats">
     <div class="stat">
       <div class="stat-num" id="statFilms">—</div>
-      <div class="stat-label">Фільмів</div>
+      <div class="stat-label">Films</div>
     </div>
     <div class="stat">
       <div class="stat-num" id="statCreators">—</div>
-      <div class="stat-label">Авторів</div>
+      <div class="stat-label">Creators</div>
     </div>
     <div class="stat">
       <div class="stat-num">5</div>
-      <div class="stat-label">Секцій</div>
+      <div class="stat-label">Sections</div>
     </div>
   </div>
 </section>
@@ -752,10 +752,10 @@
   <!-- SUBMIT BANNER -->
   <div class="submit-banner" id="submit">
     <div>
-      <h3>Ти створюєш AI-кіно?</h3>
-      <p>Ми відбираємо найкраще. Оригінальні світи, 1080p, 2–10 хвилин — і твоя робота з'явиться тут.</p>
+      <h3>Are you making AI cinema?</h3>
+      <p>We select only the best. Original worlds, 1080p, 2–10 minutes — and your work appears here.</p>
     </div>
-    <a href="#" class="btn-submit" id="submitLink">Подати заявку →</a>
+    <a href="#" class="btn-submit" id="submitLink">Submit Your Work →</a>
   </div>
 </main>
 
@@ -814,10 +814,10 @@ async function loadCatalog() {
     container.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">📡</div>
-        <div>Не вдалося завантажити каталог</div>
+        <div>Failed to load catalog</div>
         <div style="font-size:.75rem;margin-top:.5rem;color:#3a4060">${err.message}</div>
       </div>`;
-    showToast('Помилка з\'єднання з сервером');
+    showToast('Server connection error');
   }
 }
 
@@ -847,7 +847,7 @@ function renderCatalog() {
       <div class="section-block" id="${key}">
         <div class="section-header">
           <div class="section-title">${meta.emoji} ${meta.label}</div>
-          <div class="section-count">${items.length} ${items.length === 1 ? 'фільм' : 'фільмів'}</div>
+          <div class="section-count">${items.length} ${items.length === 1 ? 'film' : 'films'}</div>
           <div class="section-line"></div>
         </div>
         <div class="cards-row">
@@ -886,8 +886,8 @@ function renderEmpty(label) {
   return `
     <div class="empty-state">
       <div class="empty-icon">🎞️</div>
-      <div>Поки немає фільмів у ${label}</div>
-      <div style="font-size:.75rem;margin-top:.4rem">Перші роботи з'являться скоро</div>
+      <div>No films yet in ${label}</div>
+      <div style="font-size:.75rem;margin-top:.4rem">First works coming soon</div>
     </div>`;
 }
 
@@ -931,7 +931,7 @@ function openModal(id) {
 
   const meta = [
     item.creator_name,
-    item.duration_minutes ? `${item.duration_minutes} хв` : null,
+    item.duration_minutes ? `${item.duration_minutes} min` : null,
     item.resolution,
     item.category?.replace('_', ' '),
   ].filter(Boolean).map((m, i, a) =>
