@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroFilms — AI Cinema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #080a0f;
+    --surface:  #0e1117;
+    --card:     #111520;
+    --border:   #1e2535;
+    --accent:   #4f6ef7;
+    --accent2:  #e84c6a;
+    --gold:     #f0c060;
+    --text:     #e8eaf0;
+    --muted:    #5a6280;
+    --glow:     rgba(79,110,247,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: .5;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 1.2rem 3rem;
+    background: linear-gradient(to bottom, rgba(8,10,15,.95) 60%, transparent);
+    backdrop-filter: blur(2px);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.9rem;
+    letter-spacing: .12em;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    gap: 1.8rem;
+    list-style: none;
+    margin-left: 1rem;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .85rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .btn-premium {
+    background: linear-gradient(135deg, var(--accent), #7b5ef8);
+    color: #fff;
+    border: none;
+    padding: .5rem 1.2rem;
+    border-radius: 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 500;
+    letter-spacing: .05em;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-premium:hover { opacity: .85; transform: scale(1.03); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 3rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 40%, rgba(79,110,247,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(232,76,106,.08) 0%, transparent 60%),
+      linear-gradient(160deg, #0a0e1a 0%, #080a0f 100%);
+  }
+
+  /* Cinematic grid lines */
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,110,247,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,110,247,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+  }
+
+  /* Film strip decoration */
+  .filmstrip {
+    position: absolute;
+    top: 0; right: 0;
+    width: 3px;
+    height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--accent) 0px, var(--accent) 20px,
+      transparent 20px, transparent 30px
+    );
+    opacity: .3;
+  }
+  .filmstrip::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -40px;
+    width: 3px;
+    height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--accent2) 0px, var(--accent2) 12px,
+      transparent 12px, transparent 22px
+    );
+    opacity: .2;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    animation: fadeUp .8s ease both;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(79,110,247,.15);
+    border: 1px solid rgba(79,110,247,.3);
+    color: var(--accent);
+    font-size: .7rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .35rem .9rem;
+    border-radius: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: .95;
+    letter-spacing: .03em;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    display: block;
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 420px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .btn-watch {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: .75rem 1.8rem;
+    border-radius: .3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+    text-decoration: none;
+  }
+  .btn-watch:hover { background: #c8ccdf; transform: scale(1.02); }
+  .btn-watch svg { width: 16px; height: 16px; }
+
+  .btn-browse {
+    color: var(--muted);
+    border: 1px solid var(--border);
+    background: transparent;
+    padding: .75rem 1.6rem;
+    border-radius: .3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: color .2s, border-color .2s;
+    text-decoration: none;
+  }
+  .btn-browse:hover { color: var(--text); border-color: var(--muted); }
+
+  .hero-stats {
+    position: absolute;
+    right: 3rem;
+    bottom: 4rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeUp .9s .2s ease both;
+  }
+
+  .stat {
+    text-align: right;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: .05em;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: .65rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── CATALOG ── */
+  main {
+    padding: 0 3rem 5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: .1em;
+    color: var(--text);
+  }
+
+  .section-count {
+    font-size: .75rem;
+    color: var(--muted);
+    letter-spacing: .06em;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-left: .5rem;
+  }
+
+  .section-block {
+    margin-bottom: 3.5rem;
+    animation: fadeUp .6s ease both;
+  }
+
+  /* stagger sections */
+  .section-block:nth-child(1) { animation-delay: .1s; }
+  .section-block:nth-child(2) { animation-delay: .2s; }
+  .section-block:nth-child(3) { animation-delay: .3s; }
+  .section-block:nth-child(4) { animation-delay: .4s; }
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+    position: relative;
+    group: true;
+  }
+  .card:hover {
+    transform: translateY(-4px) scale(1.01);
+    border-color: rgba(79,110,247,.4);
+    box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(79,110,247,.15);
+  }
+
+  .card-thumb {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #0e1520 0%, #1a2035 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-thumb-placeholder {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: .05em;
+    color: rgba(79,110,247,.2);
+    user-select: none;
+  }
+
+  .card-thumb video,
+  .card-thumb iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Gradient overlay on thumb */
+  .card-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(8,10,15,.8) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .card:hover .card-thumb::after { opacity: 1; }
+
+  .play-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .25s;
+    z-index: 2;
+  }
+  .card:hover .play-icon { opacity: 1; }
+  .play-icon svg {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+
+  .card-duration {
+    position: absolute;
+    bottom: .5rem;
+    right: .6rem;
+    background: rgba(0,0,0,.7);
+    color: var(--text);
+    font-size: .7rem;
+    padding: .15rem .4rem;
+    border-radius: .2rem;
+    z-index: 3;
+    font-weight: 500;
+  }
+
+  .card-body {
+    padding: .9rem 1rem;
+  }
+
+  .card-category {
+    font-size: .65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .35rem;
+    font-weight: 500;
+  }
+
+  .card-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: .3rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-creator {
+    font-size: .78rem;
+    color: var(--muted);
+  }
+
+  .card-tags {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    margin-top: .6rem;
+  }
+
+  .tag {
+    font-size: .62rem;
+    padding: .2rem .5rem;
+    background: rgba(79,110,247,.1);
+    border: 1px solid rgba(79,110,247,.2);
+    border-radius: .2rem;
+    color: rgba(79,110,247,.8);
+    letter-spacing: .05em;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(.96) translateY(10px);
+    transition: transform .25s;
+  }
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+  .modal-video {
+    aspect-ratio: 16/9;
+    background: #000;
+    position: relative;
+  }
+  .modal-video iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .modal-info {
+    padding: 1.5rem;
+  }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: .05em;
+    margin-bottom: .5rem;
+  }
+
+  .modal-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--muted);
+    font-size: .8rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  .modal-meta .dot { color: var(--border); }
+
+  .modal-desc {
+    color: var(--muted);
+    font-size: .88rem;
+    line-height: 1.7;
+    margin-bottom: 1.2rem;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0,0,0,.5);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background .2s;
+    z-index: 10;
+  }
+  .modal-close:hover { background: rgba(232,76,106,.3); }
+
+  /* ── EMPTY / LOADING ── */
+  .empty-state {
+    grid-column: 1/-1;
+    padding: 3rem;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: .5;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: .3rem;
+  }
+  .card-skeleton .card-thumb { background: var(--card); }
+  .card-skeleton .sk-title { height: 14px; width: 70%; margin: .9rem 1rem .4rem; }
+  .card-skeleton .sk-sub   { height: 11px; width: 40%; margin: 0 1rem .9rem; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(2rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: .75rem 1.5rem;
+    border-radius: 2rem;
+    font-size: .85rem;
+    opacity: 0;
+    transition: all .3s;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── SUBMIT FORM LINK ── */
+  .submit-banner {
+    margin: 2rem 0 3rem;
+    padding: 2rem 2.5rem;
+    background: linear-gradient(135deg, rgba(79,110,247,.08), rgba(232,76,106,.05));
+    border: 1px solid rgba(79,110,247,.2);
+    border-radius: .6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .submit-banner h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: .06em;
+    margin-bottom: .3rem;
+  }
+  .submit-banner p {
+    color: var(--muted);
+    font-size: .85rem;
+    line-height: 1.5;
+  }
+
+  .btn-submit {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: .65rem 1.6rem;
+    border-radius: .3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, color .2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-submit:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: .75rem;
+    letter-spacing: .05em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .3; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.2rem; }
+    .nav-links { display: none; }
+    .hero { padding: 0 1.2rem 3rem; min-height: 70vh; }
+    .hero-stats { display: none; }
+    main { padding: 0 1.2rem 3rem; }
+    footer { flex-direction: column; gap: .8rem; text-align: center; }
+    .submit-banner { flex-direction: column; }
+  }
+
+  /* ── TV MODE ── */
+  @media (min-width: 1800px) {
+    .cards-row { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    .hero h1 { font-size: 7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">Neuro<span>Films</span></a>
+  <ul class="nav-links">
+    <li><a href="#catalog" class="active">Каталог</a></li>
+    <li><a href="#featured">Featured</a></li>
+    <li><a href="#new_drops">New Drops</a></li>
+    <li><a href="#music_visions">Music</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-premium">Premium · $4/міс</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="filmstrip"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">AI Film Festival — 24/7</div>
+    <h1>Кіно <em>нового</em> покоління</h1>
+    <p class="hero-sub">Перша кураторська платформа короткометражних фільмів, серіалів та кліпів, створених людьми за допомогою ШІ.</p>
+    <div class="hero-actions">
+      <a href="#catalog" class="btn-watch">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2.5l11 5.5-11 5.5V2.5z"/></svg>
+        Дивитись
+      </a>
+      <a href="#submit" class="btn-browse">Подати роботу</a>
+    </div>
+  </div>
+
+  <div class="hero-stats" id="heroStats">
+    <div class="stat">
+      <div class="stat-num" id="statFilms">—</div>
+      <div class="stat-label">Фільмів</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="statCreators">—</div>
+      <div class="stat-label">Авторів</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Секцій</div>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOG -->
+<main id="catalog">
+  <div id="catalogContainer">
+    <!-- Sections rendered here by JS -->
+  </div>
+
+  <!-- SUBMIT BANNER -->
+  <div class="submit-banner" id="submit">
+    <div>
+      <h3>Ти створюєш AI-кіно?</h3>
+      <p>Ми відбираємо найкраще. Оригінальні світи, 1080p, 2–10 хвилин — і твоя робота з'явиться тут.</p>
+    </div>
+    <a href="#" class="btn-submit" id="submitLink">Подати заявку →</a>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-video" id="modalVideo"></div>
+    <div class="modal-info">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="card-tags" id="modalTags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<footer>
+  <span>© 2025 NeuroFilms — AI Cinema Platform</span>
+  <span>Curated · Not Generated · <span style="color:var(--accent)">Human Taste</span></span>
+</footer>
+
+<script>
+// ── CONFIG ──
+const API_BASE = window.location.origin;
+
+// Section labels
+const SECTION_META = {
+  featured:          { emoji: '🎬', label: 'Featured' },
+  new_drops:         { emoji: '🔥', label: 'New Drops' },
+  music_visions:     { emoji: '🎵', label: 'Music Visions' },
+  experimental:      { emoji: '🧪', label: 'Experimental' },
+  creator_spotlight: { emoji: '👤', label: 'Creator Spotlight' },
+};
+
+// ── STATE ──
+let catalog = {};
+let totalFilms = 0;
+let totalCreators = new Set();
+
+// ── FETCH CATALOG ──
+async function loadCatalog() {
+  const container = document.getElementById('catalogContainer');
+  container.innerHTML = renderSkeletons();
+
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/catalog`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    catalog = await res.json();
+    renderCatalog();
+    updateStats();
+  } catch (err) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📡</div>
+        <div>Не вдалося завантажити каталог</div>
+        <div style="font-size:.75rem;margin-top:.5rem;color:#3a4060">${err.message}</div>
+      </div>`;
+    showToast('Помилка з\'єднання з сервером');
+  }
+}
+
+function renderSkeletons() {
+  return Object.keys(SECTION_META).map(key => `
+    <div class="section-block">
+      <div class="section-header">
+        <div class="section-title">${SECTION_META[key].emoji} ${SECTION_META[key].label}</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="cards-row">
+        ${[1,2,3,4].map(() => `
+          <div class="card card-skeleton">
+            <div class="card-thumb"></div>
+            <div class="sk-title skeleton"></div>
+            <div class="sk-sub skeleton"></div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderCatalog() {
+  const container = document.getElementById('catalogContainer');
+  const html = Object.entries(SECTION_META).map(([key, meta]) => {
+    const items = catalog[key] || [];
+    return `
+      <div class="section-block" id="${key}">
+        <div class="section-header">
+          <div class="section-title">${meta.emoji} ${meta.label}</div>
+          <div class="section-count">${items.length} ${items.length === 1 ? 'фільм' : 'фільмів'}</div>
+          <div class="section-line"></div>
+        </div>
+        <div class="cards-row">
+          ${items.length > 0 ? items.map(item => renderCard(item, key)).join('') : renderEmpty(meta.label)}
+        </div>
+      </div>`;
+  }).join('');
+  container.innerHTML = html;
+}
+
+function renderCard(item, section) {
+  const duration = item.duration_minutes
+    ? `${Math.floor(item.duration_minutes)}:${String(Math.round((item.duration_minutes % 1) * 60)).padStart(2,'0')}`
+    : '';
+  const tags = (item.keywords || []).slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('');
+
+  return `
+    <div class="card" onclick="openModal(${item.id})" tabindex="0">
+      <div class="card-thumb">
+        <div class="card-thumb-placeholder">NF</div>
+        <div class="play-icon">
+          <svg viewBox="0 0 16 16" fill="white"><path d="M3 2.5l11 5.5-11 5.5V2.5z"/></svg>
+        </div>
+        ${duration ? `<div class="card-duration">${duration}</div>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-category">${SECTION_META[section]?.emoji || ''} ${section.replace('_', ' ')}</div>
+        <div class="card-title" title="${escHtml(item.title)}">${escHtml(item.title)}</div>
+        <div class="card-creator">by ${escHtml(item.creator_name)}</div>
+        ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderEmpty(label) {
+  return `
+    <div class="empty-state">
+      <div class="empty-icon">🎞️</div>
+      <div>Поки немає фільмів у ${label}</div>
+      <div style="font-size:.75rem;margin-top:.4rem">Перші роботи з'являться скоро</div>
+    </div>`;
+}
+
+// ── STATS ──
+function updateStats() {
+  let films = 0;
+  const creators = new Set();
+  Object.values(catalog).forEach(items => {
+    items.forEach(item => {
+      films++;
+      creators.add(item.creator_name);
+    });
+  });
+  animateNum('statFilms', films);
+  animateNum('statCreators', creators.size);
+}
+
+function animateNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el || target === 0) { el && (el.textContent = '0'); return; }
+  let cur = 0;
+  const step = Math.ceil(target / 20);
+  const t = setInterval(() => {
+    cur = Math.min(cur + step, target);
+    el.textContent = cur;
+    if (cur >= target) clearInterval(t);
+  }, 40);
+}
+
+// ── MODAL ──
+function openModal(id) {
+  let item = null;
+  for (const items of Object.values(catalog)) {
+    item = items.find(i => i.id === id);
+    if (item) break;
+  }
+  if (!item) return;
+
+  document.getElementById('modalTitle').textContent = item.title;
+  document.getElementById('modalDesc').textContent = item.description || '';
+
+  const meta = [
+    item.creator_name,
+    item.duration_minutes ? `${item.duration_minutes} хв` : null,
+    item.resolution,
+    item.category?.replace('_', ' '),
+  ].filter(Boolean).map((m, i, a) =>
+    i < a.length - 1 ? `${escHtml(String(m))} <span class="dot">·</span>` : escHtml(String(m))
+  ).join(' ');
+  document.getElementById('modalMeta').innerHTML = meta;
+
+  const tags = (item.keywords || []).map(t => `<span class="tag">${escHtml(t)}</span>`).join('');
+  document.getElementById('modalTags').innerHTML = tags;
+
+  // Video placeholder (replace with real embed when video_url exists)
+  const videoEl = document.getElementById('modalVideo');
+  if (item.video_url) {
+    videoEl.innerHTML = `<iframe src="${item.video_url}" allowfullscreen></iframe>`;
+  } else {
+    videoEl.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;
+        background:linear-gradient(135deg,#0a0e1a,#1a2035);color:rgba(79,110,247,.4);
+        font-family:'Bebas Neue',sans-serif;font-size:4rem;letter-spacing:.1em">
+        NEUROFILMS
+      </div>`;
+  }
+
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modalVideo').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Card keyboard support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.classList.contains('card')) {
+    document.activeElement.click();
+  }
+});
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── UTILS ──
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ──
+loadCatalog();
+</script>
+</body>
+</html>

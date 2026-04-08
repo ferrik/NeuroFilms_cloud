@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from neurofilms_service import NeuroFilmsService, ValidationError
@@ -36,6 +38,7 @@ def has_role(api_key: str | None, required: str) -> bool:
 # ------------------------------------------------------------------
 
 service = NeuroFilmsService()
+INDEX_HTML = Path(__file__).parent / "index.html"
 
 
 class NeuroFilmsHandler(BaseHTTPRequestHandler):
@@ -49,6 +52,13 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_html(self, html: bytes) -> None:
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(html)))
+        self.end_headers()
+        self.wfile.write(html)
+
     def _read_json(self) -> dict:
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(length) if length else b"{}"
@@ -58,7 +68,6 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
         return self.headers.get("X-API-Key")
 
     def _require_role(self, required: str) -> bool:
-        """Returns False and sends 401/403 if role check fails."""
         api_key = self._api_key()
         if not api_key:
             self._send(HTTPStatus.UNAUTHORIZED, {"error": "Missing X-API-Key header"})
@@ -68,7 +77,7 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
             return False
         return True
 
-    def log_message(self, fmt: str, *args: object) -> None:  # silence default logs
+    def log_message(self, fmt: str, *args: object) -> None:
         pass
 
     # ------------------------------------------------------------------
@@ -79,6 +88,14 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         query = parse_qs(parsed.query)
+
+        # Frontend
+        if path in ("/", "/index.html"):
+            if INDEX_HTML.exists():
+                self._send_html(INDEX_HTML.read_bytes())
+            else:
+                self._send(HTTPStatus.NOT_FOUND, {"error": "index.html not found"})
+            return
 
         if path == "/health":
             self._send(HTTPStatus.OK, {"status": "ok"})
@@ -160,7 +177,6 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
 # ------------------------------------------------------------------
 
 def run(host: str = "0.0.0.0", port: int | None = None) -> None:
-    import os
     port = port or int(os.environ.get("PORT", 8080))
     httpd = ThreadingHTTPServer((host, port), NeuroFilmsHandler)
     print(f"NeuroFilms running on http://{host}:{port}")
