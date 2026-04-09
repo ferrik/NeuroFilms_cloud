@@ -187,7 +187,7 @@ class TestHTTPAndRBAC(unittest.TestCase):
     def test_submit_creator_key_succeeds(self) -> None:
         status, body = _request(
             "POST", self.url("/api/v1/submissions"),
-            api_key="creator-key-001", body=VALID_PAYLOAD,
+            api_key="dev-creator-key", body=VALID_PAYLOAD,
         )
         self.assertEqual(status, 201)
         self.assertEqual(body["status"], "pending")
@@ -195,14 +195,14 @@ class TestHTTPAndRBAC(unittest.TestCase):
     def test_list_submissions_requires_moderator(self) -> None:
         status, _ = _request(
             "GET", self.url("/api/v1/submissions"),
-            api_key="creator-key-001",
+            api_key="dev-creator-key",
         )
         self.assertEqual(status, 403)
 
     def test_list_submissions_moderator_succeeds(self) -> None:
         status, _ = _request(
             "GET", self.url("/api/v1/submissions"),
-            api_key="moderator-key-001",
+            api_key="dev-moderator-key",
         )
         self.assertEqual(status, 200)
 
@@ -210,12 +210,12 @@ class TestHTTPAndRBAC(unittest.TestCase):
         # Submit first
         _, sub = _request(
             "POST", self.url("/api/v1/submissions"),
-            api_key="creator-key-001", body=VALID_PAYLOAD,
+            api_key="dev-creator-key", body=VALID_PAYLOAD,
         )
         sub_id = sub["id"]
         status, _ = _request(
             "POST", self.url(f"/api/v1/submissions/{sub_id}/review"),
-            api_key="creator-key-001",
+            api_key="dev-creator-key",
             body={"decision": "approved", "moderation_reason": "ok", "section": "featured"},
         )
         self.assertEqual(status, 403)
@@ -223,12 +223,12 @@ class TestHTTPAndRBAC(unittest.TestCase):
     def test_full_flow_submit_review_catalog(self) -> None:
         _, sub = _request(
             "POST", self.url("/api/v1/submissions"),
-            api_key="creator-key-001", body=VALID_PAYLOAD,
+            api_key="dev-creator-key", body=VALID_PAYLOAD,
         )
         sub_id = sub["id"]
         status, reviewed = _request(
             "POST", self.url(f"/api/v1/submissions/{sub_id}/review"),
-            api_key="moderator-key-001",
+            api_key="dev-moderator-key",
             body={"decision": "approved", "moderation_reason": "Great work", "section": "featured"},
         )
         self.assertEqual(status, 200)

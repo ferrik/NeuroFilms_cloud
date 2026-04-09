@@ -219,7 +219,7 @@ class NeuroFilmsService:
         duration = float(payload["duration_minutes"])
         if duration < 2 or duration > 10:
             raise ValidationError("Duration must be between 2 and 10 minutes")
-        if payload["resolution"] != "1080p":
+        if payload["resolution"] not in {"1080p", "4K"}:
             raise ValidationError("Minimum resolution is 1080p")
         if not payload["world_original"]:
             raise ValidationError("Only original worlds are allowed")
