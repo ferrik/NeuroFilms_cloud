@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Your Work — NeuroFilms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #080a0f;
+    --surface: #0e1117;
+    --card:    #111520;
+    --border:  #1e2535;
+    --accent:  #4f6ef7;
+    --accent2: #e84c6a;
+    --gold:    #f0c060;
+    --text:    #e8eaf0;
+    --muted:   #5a6280;
+    --green:   #3ecf8e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: .4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; gap: 2rem;
+    padding: 1.2rem 3rem;
+    background: linear-gradient(to bottom, rgba(8,10,15,.96) 60%, transparent);
+    backdrop-filter: blur(2px);
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem;
+    letter-spacing: .12em; color: var(--text); text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+  .nav-back {
+    margin-left: auto; color: var(--muted); text-decoration: none;
+    font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-back:hover { color: var(--text); }
+
+  /* HERO STRIP */
+  .hero-strip {
+    padding: 8rem 3rem 3rem;
+    background: linear-gradient(160deg, #0a0e1a 0%, var(--bg) 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero-strip::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(79,110,247,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,110,247,.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  .hero-strip-inner {
+    position: relative; z-index: 2;
+    max-width: 760px;
+  }
+  .step-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(79,110,247,.12); border: 1px solid rgba(79,110,247,.25);
+    color: var(--accent); font-size: .7rem; letter-spacing: .14em;
+    text-transform: uppercase; padding: .35rem .9rem; border-radius: 2rem;
+    margin-bottom: 1.2rem;
+  }
+  .hero-strip h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: .95; letter-spacing: .03em; margin-bottom: 1rem;
+  }
+  .hero-strip h1 em { font-style: normal; color: var(--accent); }
+  .hero-strip p {
+    color: var(--muted); font-size: .95rem; line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* RULES BAR */
+  .rules-bar {
+    display: flex; gap: 0; overflow-x: auto;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .rule {
+    flex: 1; min-width: 160px;
+    padding: 1rem 1.5rem;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: .3rem;
+  }
+  .rule:last-child { border-right: none; }
+  .rule-icon { font-size: 1.1rem; }
+  .rule-text { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+  .rule-text strong { color: var(--text); display: block; font-weight: 500; }
+
+  /* FORM LAYOUT */
+  .form-wrap {
+    max-width: 760px; margin: 0 auto;
+    padding: 3rem 3rem 5rem;
+  }
+
+  .form-section {
+    margin-bottom: 2.5rem;
+    animation: fadeUp .5s ease both;
+  }
+  .form-section:nth-child(1) { animation-delay: .05s; }
+  .form-section:nth-child(2) { animation-delay: .1s; }
+  .form-section:nth-child(3) { animation-delay: .15s; }
+  .form-section:nth-child(4) { animation-delay: .2s; }
+  .form-section:nth-child(5) { animation-delay: .25s; }
+
+  .form-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: .1em;
+    color: var(--accent); margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: .6rem;
+  }
+  .form-section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .field { margin-bottom: 1.2rem; }
+
+  label {
+    display: block; font-size: .78rem; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .5rem; font-weight: 500;
+  }
+  label .req { color: var(--accent2); margin-left: .2rem; }
+
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: .4rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    font-weight: 300;
+    padding: .75rem 1rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,110,247,.12);
+  }
+  input::placeholder, textarea::placeholder { color: var(--muted); opacity: .5; }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+  select option { background: var(--card); }
+
+  .field-hint {
+    font-size: .72rem; color: var(--muted); margin-top: .4rem;
+    line-height: 1.5;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* CHECKBOX FIELDS */
+  .checkbox-group { display: flex; flex-direction: column; gap: .7rem; }
+  .checkbox-item {
+    display: flex; align-items: center; gap: .8rem;
+    padding: .8rem 1rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: .4rem; cursor: pointer;
+    transition: border-color .2s;
+  }
+  .checkbox-item:hover { border-color: rgba(79,110,247,.3); }
+  .checkbox-item input[type="checkbox"] {
+    width: 18px; height: 18px; min-width: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    border-radius: .2rem;
+  }
+  .checkbox-item .cb-label { font-size: .88rem; color: var(--text); }
+  .checkbox-item .cb-sub { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+
+  /* SUBMIT BUTTON */
+  .submit-area {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+
+  .btn-send {
+    display: flex; align-items: center; gap: .7rem;
+    background: linear-gradient(135deg, var(--accent), #7b5ef8);
+    color: #fff; border: none;
+    padding: .9rem 2.5rem;
+    border-radius: .4rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 500;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    letter-spacing: .02em;
+  }
+  .btn-send:hover:not(:disabled) { opacity: .85; transform: scale(1.02); }
+  .btn-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  .btn-send .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  .btn-send.loading .spinner { display: block; }
+  .btn-send.loading .btn-text { display: none; }
+
+  .submit-note { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+
+  /* SUCCESS STATE */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    animation: fadeUp .5s ease;
+  }
+  .success-screen.show { display: block; }
+  .success-icon {
+    font-size: 3.5rem; margin-bottom: 1.5rem;
+    animation: bounce .6s ease;
+  }
+  .success-screen h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; letter-spacing: .05em;
+    margin-bottom: .8rem;
+  }
+  .success-screen h2 span { color: var(--green); }
+  .success-screen p { color: var(--muted); font-size: .95rem; line-height: 1.7; margin-bottom: 2rem; }
+  .btn-back {
+    display: inline-flex; align-items: center; gap: .5rem;
+    color: var(--accent); border: 1px solid rgba(79,110,247,.3);
+    background: transparent; padding: .65rem 1.5rem;
+    border-radius: .3rem; font-family: 'DM Sans', sans-serif;
+    font-size: .9rem; cursor: pointer; text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-back:hover { background: rgba(79,110,247,.1); }
+
+  /* ERROR */
+  .error-msg {
+    display: none;
+    background: rgba(232,76,106,.1);
+    border: 1px solid rgba(232,76,106,.3);
+    color: #f08090;
+    padding: .8rem 1rem;
+    border-radius: .4rem;
+    font-size: .85rem;
+    margin-top: 1rem;
+  }
+  .error-msg.show { display: block; }
+
+  /* CHAR COUNTER */
+  .field-meta {
+    display: flex; justify-content: space-between;
+    font-size: .72rem; color: var(--muted); margin-top: .4rem;
+  }
+  .char-count { transition: color .2s; }
+  .char-count.warn { color: var(--gold); }
+  .char-count.over { color: var(--accent2); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 3rem;
+    display: flex; justify-content: space-between;
+    color: var(--muted); font-size: .72rem; letter-spacing: .05em;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes bounce {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.2); }
+  }
+
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.2rem; }
+    .hero-strip { padding: 6rem 1.2rem 2rem; }
+    .form-wrap { padding: 2rem 1.2rem 4rem; }
+    .field-row { grid-template-columns: 1fr; }
+    .rules-bar { flex-wrap: wrap; }
+    .rule { min-width: 50%; }
+    footer { flex-direction: column; gap: .5rem; }
+    .submit-area { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">Neuro<span>Films</span></a>
+  <a class="nav-back" href="/">← Back to catalog</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <div class="hero-strip-inner">
+    <div class="step-badge">✦ Open Submissions</div>
+    <h1>Submit Your <em>AI Film</em></h1>
+    <p>We curate the best short films, music videos and experimental works made with AI tools. Original worlds only. Human taste, machine vision.</p>
+  </div>
+</div>
+
+<!-- RULES -->
+<div class="rules-bar">
+  <div class="rule">
+    <div class="rule-icon">⏱</div>
+    <div class="rule-text"><strong>2–10 minutes</strong>No shorts under 2 min, no features</div>
+  </div>
+  <div class="rule">
+    <div class="rule-icon">📺</div>
+    <div class="rule-text"><strong>1080p minimum</strong>Higher resolution preferred</div>
+  </div>
+  <div class="rule">
+    <div class="rule-icon">🌍</div>
+    <div class="rule-text"><strong>Original worlds only</strong>No existing IP or franchises</div>
+  </div>
+  <div class="rule">
+    <div class="rule-icon">💬</div>
+    <div class="rule-text"><strong>Subtitles or voiceover</strong>Any language accepted</div>
+  </div>
+  <div class="rule">
+    <div class="rule-icon">🎯</div>
+    <div class="rule-text"><strong>Story or concept</strong>Not just pretty visuals</div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-wrap">
+  <form id="submitForm">
+
+    <!-- SECTION 1: CREATOR -->
+    <div class="form-section">
+      <div class="form-section-title">01 · Creator Info</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Your Name <span class="req">*</span></label>
+          <input type="text" id="creator_name" placeholder="e.g. Alex Kovalenko" required maxlength="80">
+        </div>
+        <div class="field">
+          <label>Film Title <span class="req">*</span></label>
+          <input type="text" id="title" placeholder="e.g. Neon Requiem" required maxlength="120">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: VIDEO -->
+    <div class="form-section">
+      <div class="form-section-title">02 · Your Video</div>
+
+      <div class="field">
+        <label>Video Link <span class="req">*</span></label>
+        <input type="url" id="video_url" placeholder="https://vimeo.com/... or https://youtube.com/..." required>
+        <div class="field-hint">Vimeo preferred. YouTube also accepted. Must be publicly viewable.</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Duration (minutes) <span class="req">*</span></label>
+          <input type="number" id="duration_minutes" placeholder="e.g. 5.5" min="2" max="10" step="0.5" required>
+          <div class="field-hint">Between 2 and 10 minutes</div>
+        </div>
+        <div class="field">
+          <label>Resolution <span class="req">*</span></label>
+          <select id="resolution" required>
+            <option value="">Select resolution</option>
+            <option value="1080p">1080p (Full HD)</option>
+            <option value="1080p">4K (will be listed as 1080p+)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: CATEGORY -->
+    <div class="form-section">
+      <div class="form-section-title">03 · Category &amp; Description</div>
+
+      <div class="field">
+        <label>Category <span class="req">*</span></label>
+        <select id="category" required>
+          <option value="">Select a category</option>
+          <option value="new_drops">🔥 New Drops — short films, narratives</option>
+          <option value="music_visions">🎵 Music Visions — AI music videos</option>
+          <option value="experimental">🧪 Experimental — surrealism, art, sci-fi</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Description <span class="req">*</span></label>
+        <textarea id="description" placeholder="Describe your film — the story, concept, visual style, tools used..." required maxlength="600" rows="4"></textarea>
+        <div class="field-meta">
+          <span class="field-hint" style="margin:0">What makes this work interesting?</span>
+          <span class="char-count" id="descCount">0 / 600</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Keywords / Tags</label>
+        <input type="text" id="keywords" placeholder="e.g. cyberpunk, generative, runway, music">
+        <div class="field-hint">Comma-separated. Helps with discovery.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: CHECKLIST -->
+    <div class="form-section">
+      <div class="form-section-title">04 · Confirm Requirements</div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" id="world_original" required>
+          <div>
+            <div class="cb-label">This is an original world / original characters</div>
+            <div class="cb-sub">No Marvel, DC, Disney, Harry Potter or other existing IP</div>
+          </div>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="has_subtitles_or_voiceover" required>
+          <div>
+            <div class="cb-label">The film has subtitles or voiceover</div>
+            <div class="cb-sub">Any language is accepted</div>
+          </div>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="confirm_rules" required>
+          <div>
+            <div class="cb-label">I confirm this is my original work</div>
+            <div class="cb-sub">No plagiarism, no deepfakes of real people, no 18+ content</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <button type="submit" class="btn-send" id="submitBtn">
+        <span class="btn-text">Submit for Review →</span>
+        <span class="spinner"></span>
+      </button>
+      <div class="submit-note">
+        We review every submission personally.<br>
+        You'll receive a response within 48 hours.
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🎬</div>
+    <h2>Submitted <span>Successfully</span></h2>
+    <p>
+      Your film is in the queue. We review every submission personally.<br>
+      If it passes our quality bar — it goes live on NeuroFilms within 48 hours.
+    </p>
+    <a href="/" class="btn-back">← Back to catalog</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2025 NeuroFilms — AI Cinema Platform</span>
+  <span>Curated · Not Generated · <span style="color:var(--accent)">Human Taste</span></span>
+</footer>
+
+<script>
+const API = window.location.origin;
+
+// Char counter
+const descEl = document.getElementById('description');
+const countEl = document.getElementById('descCount');
+descEl.addEventListener('input', () => {
+  const len = descEl.value.length;
+  const max = 600;
+  countEl.textContent = `${len} / ${max}`;
+  countEl.className = 'char-count' + (len > max * .9 ? ' warn' : '') + (len >= max ? ' over' : '');
+});
+
+// Form submit
+document.getElementById('submitForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const btn = document.getElementById('submitBtn');
+  const errEl = document.getElementById('errorMsg');
+  errEl.classList.remove('show');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  // Parse keywords
+  const kwRaw = document.getElementById('keywords').value;
+  const keywords = kwRaw ? kwRaw.split(',').map(k => k.trim()).filter(Boolean) : [];
+
+  const payload = {
+    title:                      document.getElementById('title').value.trim(),
+    creator_name:               document.getElementById('creator_name').value.trim(),
+    video_url:                  document.getElementById('video_url').value.trim(),
+    duration_minutes:           parseFloat(document.getElementById('duration_minutes').value),
+    category:                   document.getElementById('category').value,
+    resolution:                 document.getElementById('resolution').value,
+    description:                document.getElementById('description').value.trim(),
+    keywords,
+    world_original:             document.getElementById('world_original').checked,
+    has_subtitles_or_voiceover: document.getElementById('has_subtitles_or_voiceover').checked,
+  };
+
+  try {
+    const res = await fetch(`${API}/api/v1/submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': 'creator-key-001',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || `Server error ${res.status}`);
+    }
+
+    // Show success
+    document.getElementById('submitForm').style.display = 'none';
+    document.getElementById('successScreen').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (err) {
+    errEl.textContent = `Error: ${err.message}`;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.classList.remove('loading');
+  }
+});
+</script>
+</body>
+</html>

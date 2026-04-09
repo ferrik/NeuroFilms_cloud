@@ -39,6 +39,7 @@ def has_role(api_key: str | None, required: str) -> bool:
 
 service = NeuroFilmsService()
 INDEX_HTML = Path(__file__).parent / "index.html"
+SUBMIT_HTML = Path(__file__).parent / "submit.html"
 
 
 class NeuroFilmsHandler(BaseHTTPRequestHandler):
@@ -95,6 +96,13 @@ class NeuroFilmsHandler(BaseHTTPRequestHandler):
                 self._send_html(INDEX_HTML.read_bytes())
             else:
                 self._send(HTTPStatus.NOT_FOUND, {"error": "index.html not found"})
+            return
+
+        if path in ("/submit", "/submit.html"):
+            if SUBMIT_HTML.exists():
+                self._send_html(SUBMIT_HTML.read_bytes())
+            else:
+                self._send(HTTPStatus.NOT_FOUND, {"error": "submit.html not found"})
             return
 
         if path == "/health":
